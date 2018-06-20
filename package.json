@@ -1,0 +1,23 @@
+{
+  "name": "electron-sim",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^16.4.1",
+    "electron": "^2.0.2"
+  },
+  "dependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/node": "^10.3.4",
+    "@types/react-dom": "^16.0.6",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "styled-components": "^3.3.2",
+    "ts-node": "^6.1.1",
+    "typescript": "^2.9.2"
+  },
+  "scripts": {
+    "start": "electron ."
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "target": "es5",
+    "module": "commonjs",
+    "jsx": "react"
+  }
+}
