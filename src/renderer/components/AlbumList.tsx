@@ -23,6 +23,7 @@ export class AlbumList extends React.Component<Props, State> {
     });
   }
   render() {
+    console.log("render");
     const { albums } = this.state;
     return (
       <ul>
