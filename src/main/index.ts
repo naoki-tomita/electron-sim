@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 
 app.on("ready", () => {
   const window = new BrowserWindow({ width: 800, height: 600 });
