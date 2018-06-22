@@ -1,4 +1,4 @@
-import { readdir as _readdir } from "fs";
+import { readdir as _readdir, readFile as _readFile } from "fs";
 
 export async function readdir(path: string): Promise<string[]> {
   return new Promise<string[]>((ok, ng) => {
@@ -8,5 +8,16 @@ export async function readdir(path: string): Promise<string[]> {
       }
       ok(files);
     })
+  });
+}
+
+export async function readFile(path: string): Promise<Buffer> {
+  return new Promise<Buffer>((ok, ng) => {
+    _readFile(path, (err, data) => {
+      if (err) {
+        return ng(err);
+      }
+      ok(data);
+    });
   });
 }

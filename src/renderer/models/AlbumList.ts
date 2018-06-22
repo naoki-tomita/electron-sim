@@ -9,6 +9,7 @@ export interface AlbumItem {
 
 export class AlbumList extends Observable {
   readonly root: string;
+  selectedItem: AlbumItem;
   albums: AlbumItem[] = [];
   constructor(root: string) {
     super();
@@ -21,6 +22,14 @@ export class AlbumList extends Observable {
       label: dir,
       path: join(this.root, dir),
     }));
+    if (!this.selectedItem) {
+      this.selectedItem = this.albums[0];
+    }
+    this.triggerUpdate();
+  }
+
+  select(item: AlbumItem) {
+    this.selectedItem = item;
     this.triggerUpdate();
   }
 }
