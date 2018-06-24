@@ -33,7 +33,7 @@ export class ImageListComponent extends React.Component<Props> {
     `;
     return (
       <GridContainer>
-        {model.list && model.list.map(i => this.renderImageItem(i))}
+        {model.getList().map(i => this.renderImageItem(i))}
       </GridContainer>
     );
   }
@@ -43,7 +43,7 @@ export class ImageListComponent extends React.Component<Props> {
       <img
         src={getImageDataUrl(
           extname(item.label),
-          item.buf.toString("base64")
+          item.raw,
         )}
         width={this.props.size}
       />

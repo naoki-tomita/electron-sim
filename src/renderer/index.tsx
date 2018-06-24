@@ -7,6 +7,9 @@ import { AlbumList, AlbumItem } from "./models/AlbumList";
 import { AlbumListComponent } from "./components/AlbumList";
 import { Body } from "./components/Body";
 import { ImageList } from "./models/ImageList";
+import { ImageListComponent } from "./components/ImageList";
+import { AlbumCache } from "../main/AlbumCache";
+import { all } from "../main/AlbumDatabase";
 
 class Headers extends React.Component {
   render() {
@@ -37,14 +40,13 @@ class App extends React.Component<{}, State> {
   imageList: ImageList;
   constructor(p: {}, c: any) {
     super(p, c);
-    this.albumList = new AlbumList("C:\\Users\\z00s000770\\Desktop\\folder");
+    this.albumList = new AlbumList("/Volumes/Untitled/pics");
     this.imageList = new ImageList();
     this.state = {} as any;
   }
 
   componentDidMount() {
     this.albumList.onUpdate(() => {
-      console.log(this.albumList.selectedItem);
       this.imageList.setAlbum(this.albumList.selectedItem);
     });
   }
@@ -72,4 +74,32 @@ class App extends React.Component<{}, State> {
   }
 }
 
-render(<App/>, document.getElementById("app"));
+// render(<App/>, document.getElementById("app"));
+
+async function main() {
+  const cache = new AlbumCache(256);
+  await cache.init();
+  await cache.addAlbum("/Volumes/Untitled/pics/JA-M-P!!2010");
+
+  console.log(await all("SELECT * FROM album_list"));
+  console.log(await all("SELECT * FROM image_list"));
+  let fn: any;
+  const model: any = {
+    list: await cache.getAlbumTumbnails({
+      label: "",
+      path: "/Volumes/Untitled/pics/JA-M-P!!2010",
+    }),
+    setAlbum() {},
+    getList() {
+      return this.list;
+    },
+    onUpdate(cb: any) {
+      fn = cb;
+    },
+  };
+
+  render(<ImageListComponent size={256} model={model} />, document.getElementById("app"));
+  fn();
+}
+
+main();

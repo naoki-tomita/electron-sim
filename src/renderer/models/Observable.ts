@@ -18,7 +18,7 @@ export class Observable {
     this.eventOnce[type].push(cb);
   }
 
-  trigger(type: string, ...params: any[]) {
+  protected trigger(type: string, ...params: any[]) {
     if (this.event[type]) {
       this.event[type].forEach(x => x(params));
     }
@@ -33,7 +33,7 @@ export class Observable {
     this.on("update", cb);
   }
 
-  triggerUpdate(...params: any[]) {
+  protected triggerUpdate(...params: any[]) {
     this.trigger("update", ...params);
   }
 }

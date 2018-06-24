@@ -7,20 +7,23 @@ import { AlbumItem } from "./AlbumList";
 export interface ImageItem {
   label: string;
   path: string;
-  buf: Buffer;
+  raw: string;
 }
 
 export class ImageList extends Observable {
-  path: string;
-  list?: ImageItem[];
+  private path: string;
+  private list?: ImageItem[];
   async setAlbum(item: AlbumItem) {
     const path = item.path;
     this.path = path;
     const list = (await readdir(path))
       .filter(name => isImage(extname(name)))
       .map(name => ({ label: name, path: join(path, name) }));
-    this.list = await Promise.all(list.map(async l => ({ buf: await readFile(l.path), ...l })));
-    console.log(this.list);
+    this.list = await Promise.all(list.map(async l => ({ raw: (await readFile(l.path)).toString("base64"), ...l })));
     this.triggerUpdate();
+  }
+
+  getList(): ImageItem[] {
+    return this.list || [];
   }
 }
