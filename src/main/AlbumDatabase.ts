@@ -20,23 +20,45 @@ function check() {
 }
 
 export async function initializeAlbumList() {
-  await exec("CREATE TABLE IF NOT EXISTS album_list (id INTEGER PRIMARY KEY, label TEXT, path TEXT);");
+  await exec("CREATE TABLE IF NOT EXISTS album_list (id INTEGER PRIMARY KEY, label TEXT, path TEXT, UNIQUE(path));");
 }
 
 export async function addAlbum(album: AlbumItem) {
-  await exec(`INSERT INTO album_list(label, path) VALUES ("${album.label}", "${album.path}")`);
+  await exec(`INSERT OR IGNORE INTO album_list(label, path) VALUES ("${album.label}", "${album.path}")`);
 }
 
 export async function getAlbumId(album: AlbumItem): Promise<number | null> {
   const result = await get(`SELECT id FROM album_list WHERE path="${album.path}"`);
-  if (result.id) {
+  if (result) {
     return result.id;
   }
   return null;
 }
 
+export async function getAlbums(): Promise<AlbumItem[]> {
+  const results = await all("SELECT * FROM album_list");
+  if (results) {
+    return results.map(x => ({
+      label: x.label,
+      path: x.path,
+    }));
+  }
+  return [];
+}
+
+export async function getAlbum(path: string) {
+  const album = await get(`SELECT * FROM album_list WHERE path="${path}"`)
+  if (album) {
+    return {
+      label: album.label,
+      path: album.path,
+    };
+  }
+  return null;
+}
+
 export async function initializeThumbnailList() {
-  await exec("CREATE TABLE IF NOT EXISTS image_list (id INTEGER PRIMARY KEY, album_id INTEGER, path TEXT, label TEXT, thumbnail TEXT);");
+  await exec("CREATE TABLE IF NOT EXISTS image_list (id INTEGER PRIMARY KEY, album_id INTEGER, path TEXT, label TEXT, thumbnail TEXT, UNIQUE(path));");
 }
 
 export async function addThumbnails(albumId: number, images: ImageItem[]) {
@@ -44,7 +66,7 @@ export async function addThumbnails(albumId: number, images: ImageItem[]) {
   return new Promise(done => {
     db.serialize(() => {
       db.exec("BEGIN TRANSACTION");
-      const stmt = db.prepare(`INSERT INTO image_list (album_id, path, label, thumbnail) VALUES (${albumId}, ?, ?, ?)`);
+      const stmt = db.prepare(`INSERT OR IGNORE INTO image_list (album_id, path, label, thumbnail) VALUES (${albumId}, ?, ?, ?)`);
       images.forEach(image => stmt.run(image.path, image.label, image.raw));
       stmt.finalize();
       db.exec("COMMIT", () => done());

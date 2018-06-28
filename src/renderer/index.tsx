@@ -31,24 +31,15 @@ class Footer extends React.Component {
   }
 }
 
-interface State {
-  selectedAlbum: AlbumItem;
-}
-
-class App extends React.Component<{}, State> {
+interface Props {
   albumList: AlbumList;
   imageList: ImageList;
-  constructor(p: {}, c: any) {
-    super(p, c);
-    this.albumList = new AlbumList("/Volumes/Untitled/pics");
-    this.imageList = new ImageList();
-    this.state = {} as any;
-  }
+}
 
-  componentDidMount() {
-    this.albumList.onUpdate(() => {
-      this.imageList.setAlbum(this.albumList.selectedItem);
-    });
+class App extends React.Component<Props> {
+  constructor(p: Props, c: any) {
+    super(p, c);
+    this.state = {} as any;
   }
 
   render() {
@@ -66,40 +57,28 @@ class App extends React.Component<{}, State> {
     return (
       <GridComponent>
         <Headers/>
-        <AlbumListComponent model={this.albumList}/>
-        <Body model={this.imageList} size={100}/>
+        <AlbumListComponent model={this.props.albumList}/>
+        <Body model={this.props.imageList} size={256}/>
         <Footer/>
       </GridComponent>
     );
   }
 }
 
-// render(<App/>, document.getElementById("app"));
-
 async function main() {
   const cache = new AlbumCache(256);
   await cache.init();
-  await cache.addAlbum("/Volumes/Untitled/pics/JA-M-P!!2010");
+  const albumList = new AlbumList("/Volumes/Untitled/pics", cache);
+  const imageList = new ImageList(cache);
 
-  console.log(await all("SELECT * FROM album_list"));
-  console.log(await all("SELECT * FROM image_list"));
-  let fn: any;
-  const model: any = {
-    list: await cache.getAlbumTumbnails({
-      label: "",
-      path: "/Volumes/Untitled/pics/JA-M-P!!2010",
-    }),
-    setAlbum() {},
-    getList() {
-      return this.list;
-    },
-    onUpdate(cb: any) {
-      fn = cb;
-    },
-  };
+  albumList.onUpdate(() => {
+    imageList.setAlbum(albumList.getSelectedAlbum());
+  })
 
-  render(<ImageListComponent size={256} model={model} />, document.getElementById("app"));
-  fn();
+  render(
+    <App albumList={albumList} imageList={imageList} />,
+    document.getElementById("app"),
+  );
 }
 
 main();

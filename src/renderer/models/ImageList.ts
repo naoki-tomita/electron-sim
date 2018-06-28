@@ -3,6 +3,7 @@ import { readdir, readFile } from "../../utils/fs";
 import { join, extname } from "path";
 import { isImage } from "../../utils/File";
 import { AlbumItem } from "./AlbumList";
+import { AlbumCache } from "../../main/AlbumCache";
 
 export interface ImageItem {
   label: string;
@@ -11,15 +12,16 @@ export interface ImageItem {
 }
 
 export class ImageList extends Observable {
-  private path: string;
-  private list?: ImageItem[];
+  path: string;
+  readonly cache: AlbumCache;
+  list?: ImageItem[];
+  constructor(cache: AlbumCache) {
+    super();
+    this.cache = cache;
+  }
+
   async setAlbum(item: AlbumItem) {
-    const path = item.path;
-    this.path = path;
-    const list = (await readdir(path))
-      .filter(name => isImage(extname(name)))
-      .map(name => ({ label: name, path: join(path, name) }));
-    this.list = await Promise.all(list.map(async l => ({ raw: (await readFile(l.path)).toString("base64"), ...l })));
+    this.list = await this.cache.getAlbumTumbnails(item);
     this.triggerUpdate();
   }
 

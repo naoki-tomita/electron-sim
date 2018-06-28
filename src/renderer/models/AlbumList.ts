@@ -1,6 +1,7 @@
-import { readdir } from "../../utils/fs";
+import { readdir, stat } from "../../utils/fs";
 import { Observable } from "./Observable";
 import { join } from "path";
+import { AlbumCache } from "../../main/AlbumCache";
 
 export interface AlbumItem {
   label: string;
@@ -9,27 +10,40 @@ export interface AlbumItem {
 
 export class AlbumList extends Observable {
   readonly root: string;
-  selectedItem: AlbumItem;
+  readonly cache: AlbumCache;
   albums: AlbumItem[] = [];
-  constructor(root: string) {
+  selectedItem: AlbumItem;
+  constructor(root: string, cache: AlbumCache) {
     super();
     this.root = root;
-    this.update();
+    this.cache = cache;
+    cache.onUpdate(async () => {
+      this.albums = await cache.getAlbums();
+      this.selectedItem = this.selectedItem || this.albums[0];
+      this.triggerUpdate();
+    });
+    this.load();
   }
-  async update() {
+
+  async load() {
     const dirs = await readdir(this.root);
-    this.albums = dirs.map(dir => ({
-      label: dir,
-      path: join(this.root, dir),
-    }));
-    if (!this.selectedItem) {
-      this.selectedItem = this.albums[0];
+    for (const dir of dirs) {
+      if ((await stat(join(this.root, dir))).isDirectory()) {
+        await this.cache.addAlbum(join(this.root, dir));
+      }
     }
-    this.triggerUpdate();
   }
 
   select(item: AlbumItem) {
     this.selectedItem = item;
     this.triggerUpdate();
+  }
+
+  getAlbums() {
+    return this.albums;
+  }
+
+  getSelectedAlbum() {
+    return this.selectedItem;
   }
 }

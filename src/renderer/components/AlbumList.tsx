@@ -22,7 +22,7 @@ export class AlbumListComponent extends React.Component<Props, State> {
     const { model } = this.props;
     model.onUpdate(() => {
       this.setState({
-        albums: model.albums,
+        albums: model.getAlbums(),
       });
     });
   }
