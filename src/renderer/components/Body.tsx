@@ -1,11 +1,9 @@
 import styled from "styled-components";
 import * as React from "react";
 import { ImageListComponent } from "./ImageList";
-import { ImageList } from "../models/ImageList";
-import { AlbumItem } from "../models/AlbumList";
 
 interface Props {
-  model: ImageList;
+  id: number;
   size: number;
 }
 
@@ -17,10 +15,10 @@ export class Body extends React.Component<Props> {
       position: relative;
     `;
     const display = false;
-    const { size, model } = this.props;
+    const { size, id } = this.props;
     return (
       <GridItem>
-        <ImageListComponent size={size} model={model}/>
+        <ImageListComponent size={size} id={id}/>
         <ImageView display={display}/>
       </GridItem>
     );

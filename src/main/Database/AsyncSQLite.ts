@@ -1,4 +1,4 @@
-import { Database, OPEN_READWRITE, OPEN_CREATE } from "sqlite3";
+import { Database, OPEN_READWRITE, OPEN_CREATE, Statement } from "sqlite3";
 
 let db: Database;
 
@@ -58,6 +58,16 @@ export async function all(sql: string, params?: string[]) {
     db.all(sql, params, (err, rows) => {
       if (err) return ng(err);
       ok(rows);
+    });
+  });
+}
+
+export async function prepare(sql: string) {
+  check();
+  return new Promise<Statement>((ok, ng) => {
+    const statement = db.prepare(sql, err => {
+      if (err) return ng(err);
+      ok(statement);
     });
   });
 }

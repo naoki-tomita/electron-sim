@@ -23,6 +23,7 @@
   },
   "scripts": {
     "start": "electron .",
-    "clean": "rm -f ./database.db"
+    "clean": "rm -f ./database.db",
+    "rebuild": "electron-rebuild sqlite3"
   }
 }

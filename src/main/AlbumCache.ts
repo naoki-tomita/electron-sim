@@ -1,76 +1,34 @@
-import { basename, extname, join } from "path";
-import {
-  addAlbum,
-  getAlbumId,
-  addThumbnails,
-  initialize,
-  getAlbumThumbnails,
-  getAlbums,
-  getAlbum,
-  getThumbnail,
-} from "./AlbumDatabase";
+import { addAlbum } from "./Database/Album";
 import { readdir } from "../utils/fs";
-import { isImage } from "../utils/File";
-import { ImageItem } from "../renderer/models/ImageList";
+import { getImages, updateImage, addImage } from "./Database/Image";
 import { createThumbnail } from "./Thumbnail";
-import { Observable } from "../renderer/models/Observable";
-import { AlbumItem } from "../renderer/models/AlbumList";
+import { isExtImage } from "../utils/File";
+import { join, extname } from "path";
+import { dispatchUpdateAlbum, dispatchUpdateAlbums } from "./IPC/Album";
+import { dispatchUpdateImage } from "./IPC/Image";
 
+export async function createAlbumCache(path: string) {
+  const album = await addAlbum({ path });
+  dispatchUpdateAlbum(album.id);
+  dispatchUpdateAlbums();
 
-export class AlbumCache extends Observable {
-  readonly width: number;
-  constructor(width: number) {
-    super();
-    this.width = width;
-  }
-  async init() {
-    await initialize("./database.db");
-  }
-
-  async addAlbum(path: string) {
-    const albumItem = {
-      label: basename(path),
-      path,
-    };
-
-    if ((await getAlbumId(albumItem)) == null) {
-      await addAlbum(albumItem);
-    }
-    const id = await getAlbumId(albumItem);
-    if (!id) {
-      return;
-    }
-
-    const list = (await readdir(path));
-    const dirs = await list.filter(x => isImage(extname(x)));
-    const imageThumbs: ImageItem[] = [];
-    for (const dir of dirs) {
-      if (
-        (await getThumbnail({
-          path: join(path, dir),
-        })) == null
-      ) {
-        imageThumbs.push({
-          label: dir,
-          path: join(path, dir),
-          raw: (await createThumbnail(join(path, dir), this.width)).toString("base64"),
-        });
-      }
-    }
-
-    await addThumbnails(id, imageThumbs);
-    this.triggerUpdate();
+  const files = await readdir(path);
+  const datas = files
+    .filter(f => isExtImage(extname(f)))
+    .map(f => ({
+      album_id: album.id,
+      path: join(path, f),
+    }));
+  for (const data of datas) {
+    await addImage(data);
+    dispatchUpdateAlbum(album.id);
   }
 
-  async getAlbums() {
-    return await getAlbums();
-  }
-
-  async getAlbumTumbnails(albumItem: AlbumItem) {
-    const id = await getAlbumId(albumItem);
-    if (id) {
-      return (await getAlbumThumbnails(id)) || [];
-    }
-    return [];
+  const images = await getImages(album.id);
+  for (const image of images) {
+    const thumb = await createThumbnail(image.path, 400);
+    await updateImage({ id: image.id }, { thumbnail: thumb.toString("base64") });
+    dispatchUpdateAlbum(album.id);
+    dispatchUpdateImage(image.id);
   }
 }

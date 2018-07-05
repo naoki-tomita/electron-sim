@@ -1,5 +1,5 @@
 const extNames = ["png", "jpg", "jpeg", "bmp", "gif"];
-export function isImage(ext: string): boolean {
+export function isExtImage(ext: string): boolean {
   return extNames.includes(ext.toLowerCase().substr(1));
 }
 

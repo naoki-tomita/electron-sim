@@ -1,5 +1,6 @@
-import { TableSchema, createTable as createTableCore } from "./";
-import { exec } from "./AsyncSQLite";
+import { TableSchema, createTable as createTableCore, buildValues, buildQueries } from "./";
+import { exec, prepare, get, all } from "./AsyncSQLite";
+import { Album } from "../../types/Album";
 
 const TableName = "album";
 const TableSchema: TableSchema[] = [{
@@ -12,11 +13,11 @@ const TableSchema: TableSchema[] = [{
   nullable: true,
 }, {
   key: "path",
-  type: "TEXT"
+  type: "TEXT",
+  unique: true,
 }];
 
-interface Raw {
-  id?: number;
+type InputRaw = {
   name?: string;
   path: string;
 }
@@ -25,12 +26,19 @@ export async function createTable() {
   await createTableCore(TableName, TableSchema);
 }
 
-export async function addAlbum(album: Raw) {
+export async function addAlbum(album: InputRaw): Promise<Album> {
   await exec(
-    `INSERT INTO ${TableName}(name, path) VALUES(${album.name ? `"${album.name}"` : null}, "${album.path}")`
+    `INSERT OR IGNORE INTO ${TableName} ${buildValues(album)}`
+  );
+  return await get(
+    `SELECT * FROM ${TableName} WHERE ${buildQueries({ path: album.path, })}`
   );
 }
 
-export async function addAlbums(...albums: Raw[]) {
+export async function getAlbum(id: number) {
+  return await get(`SELECT * FROM ${TableName} WHERE ${buildQueries({ id, })}`) as Album;
+}
 
+export async function getAlbums() {
+  return await all(`SELECT * FROM ${TableName}`) as Album[];
 }

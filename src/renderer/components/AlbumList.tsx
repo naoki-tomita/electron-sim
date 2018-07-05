@@ -1,39 +1,44 @@
 import * as React from "react";
 import styled from "styled-components";
 
-import { AlbumList, AlbumItem } from "../models/AlbumList";
-
-interface State {
-  albums: AlbumItem[];
-}
+import { onceUpdateAlbums, getAlbums } from "../Services/Album";
+import { Album } from "../../types/Album";
 
 interface Props {
-  model: AlbumList;
+  onChange: (id: number) => void;
 }
+
+interface State {
+  albums: Album[];
+  selectedItem: Album | null;
+}
+
+const GridItem = styled.div`
+  background-color: red;
+  grid-area: album-list;
+  overflow: auto;
+`;
 
 export class AlbumListComponent extends React.Component<Props, State> {
   constructor(p: Props, c: any) {
     super(p, c);
-    const { model } = this.props;
-    this.state = { albums: model.albums };
+    this.state = { albums: [], selectedItem: null };
   }
 
   componentDidMount() {
-    const { model } = this.props;
-    model.onUpdate(() => {
-      this.setState({
-        albums: model.getAlbums(),
-      });
-    });
+    this.handleUpdateAlbums();
+  }
+
+  handleUpdateAlbums = async () => {
+    const albums = await getAlbums();
+    const { selectedItem = null } = this.state || {};
+    this.setState({ albums, });
+    this.onSelect(selectedItem || albums[0]);
+    onceUpdateAlbums(this.handleUpdateAlbums);
   }
 
   render() {
     const { albums } = this.state;
-    const GridItem = styled.div`
-      background-color: red;
-      grid-area: album-list;
-      overflow: auto;
-    `;
     return (
       <GridItem>
         {albums.map(a => this.renderAlbumItem(a))}
@@ -41,10 +46,9 @@ export class AlbumListComponent extends React.Component<Props, State> {
     )
   }
 
-  renderAlbumItem(album: AlbumItem) {
-    const { selectedItem } = this.props.model;
+  renderAlbumItem(album: Album) {
+    const { selectedItem = null } = this.state || {};
     const isSelected = selectedItem &&
-                       selectedItem.label === album.label &&
                        selectedItem.path === album.path;
 
     const FullWidthListItem = styled.div`
@@ -52,13 +56,17 @@ export class AlbumListComponent extends React.Component<Props, State> {
       background-color: ${isSelected ? "gray" : "inhelit"};
     `
     return (
-      <FullWidthListItem key={album.label} onClick={() => this.onSelect(album)}>
-        {album.label}
+      <FullWidthListItem key={album.path} onClick={() => this.onSelect(album)}>
+        {album.name || album.path}
       </FullWidthListItem>
     );
   }
 
-  onSelect = (item: AlbumItem) => {
-    this.props.model.select(item);
+  onSelect = (selectedItem: Album) => {
+    this.setState({
+      selectedItem,
+    });
+    const { onChange } = this.props;
+    onChange(selectedItem.id);
   }
 }

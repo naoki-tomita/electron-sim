@@ -1,25 +1,43 @@
 import styled from "styled-components";
 import * as React from "react";
 
-import { AlbumItem } from "../models/AlbumList";
-import { ImageList , ImageItem } from "../models/ImageList";
 import { extname } from "path";
 import { getImageDataUrl } from "../../utils/File";
+import { Image } from "../../types/Images";
+import { getAlbumImages, onceUpdateAlbum } from "../Services/Album";
 
 interface Props {
   size: number;
-  model: ImageList;
+  id?: number;
 }
 
-export class ImageListComponent extends React.Component<Props> {
-  componentDidMount() {
-    this.props.model.onUpdate(() => {
-      this.forceUpdate();
-    });
+interface State {
+  images: Image[];
+  prevId?: number;
+}
+
+export class ImageListComponent extends React.Component<Props, State> {
+  constructor(p: Props, c: any) {
+    super(p, c);
+    this.state = { images: [] };
+  }
+
+  handleUpdateAlbum = async () => {
+    const { id } = this.props;
+    const { prevId } = this.state;
+    if (id === prevId) {
+      return;
+    }
+    if (id != null) {
+      const images = await getAlbumImages(id);
+      this.setState({ images, prevId: id });
+      onceUpdateAlbum(id, this.handleUpdateAlbum);
+    }
   }
 
   render() {
-    const { model } = this.props;
+    this.handleUpdateAlbum();
+    const { images = [] } = this.state || {};
     const GridContainer = styled.div`
       display: grid;
       grid-auto-rows: ${this.props.size}px;
@@ -33,18 +51,19 @@ export class ImageListComponent extends React.Component<Props> {
     `;
     return (
       <GridContainer>
-        {model.getList().map(i => this.renderImageItem(i))}
+        {images.map(this.renderImageItem)}
       </GridContainer>
     );
   }
 
-  renderImageItem(item: ImageItem) {
+  renderImageItem = (item: Image) => {
+    const { path, thumbnail } = item;
+    const src = thumbnail
+      ? getImageDataUrl(extname(path), thumbnail)
+      : "http://www.51allout.co.uk/wp-content/uploads/2012/02/Image-not-found.gif";
     return (
       <img
-        src={getImageDataUrl(
-          extname(item.label),
-          item.raw,
-        )}
+        src={src}
         width={this.props.size}
       />
     );
