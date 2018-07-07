@@ -22,3 +22,9 @@ export function onceUpdateAlbums(fn: () => void) {
 export function onceUpdateAlbum(id: number, fn: () => void) {
   ipcRenderer.once(`album:update:${id}`, fn);
 }
+
+export function onUpdateAlbum(id: number, fn: () => void) {
+  ipcRenderer.on(`album:update:${id}`, fn);
+  console.log(ipcRenderer.eventNames());
+  console.log(ipcRenderer.listenerCount(`album:update:${id}`));
+}

@@ -1,4 +1,4 @@
-import { ipcMain, Event } from "electron";
+import { ipcMain, Event, BrowserWindow } from "electron";
 import { readFile } from "../../utils/fs";
 import { getImage } from "../Database/Image";
 
@@ -9,5 +9,5 @@ ipcMain.on("image:raw", async (event: Event, arg: { id: number }) => {
 });
 
 export function dispatchUpdateImage(id: number) {
-  ipcMain.emit(`image:update:${id}`);
+  BrowserWindow.getAllWindows().forEach(w => w.webContents.send(`image:update:${id}`));
 }

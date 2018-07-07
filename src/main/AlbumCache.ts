@@ -41,7 +41,7 @@ async function run() {
 
   const images = await getImages(album.id);
   for (const image of images) {
-    const thumb = await createThumbnail(image.path, 400);
+    const thumb = await createThumbnail(image.path, 256);
     await updateImage({ id: image.id }, { thumbnail: thumb.toString("base64") });
     dispatchUpdateAlbum(album.id);
     dispatchUpdateImage(image.id);

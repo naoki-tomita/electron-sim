@@ -1,4 +1,4 @@
-import { ipcMain, Event } from "electron";
+import { ipcMain, Event, app, BrowserWindow } from "electron";
 import { getAlbums, getAlbum, updateAlbum } from "../Database/Album";
 import { getImages } from "../Database/Image";
 import { Album } from "../../types/Album";
@@ -19,9 +19,9 @@ ipcMain.on("album:item:post", async (event: Event, arg: Album) => {
 });
 
 export function dispatchUpdateAlbums() {
-  ipcMain.emit("album:update");
+  BrowserWindow.getAllWindows().forEach(w => w.webContents.send(`album:update`));
 }
 
 export function dispatchUpdateAlbum(id: number) {
-  ipcMain.emit(`album:update:${id}`);
+  BrowserWindow.getAllWindows().forEach(w => w.webContents.send(`album:update:${id}`));
 }

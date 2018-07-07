@@ -5,6 +5,7 @@ import styled, { injectGlobal } from "styled-components";
 
 import { AlbumListComponent } from "./components/AlbumList";
 import { Body } from "./components/Body";
+import { onUpdateAlbum } from "./Services/Album";
 
 const Header = styled.div`
   background-color: green;
@@ -44,7 +45,7 @@ class App extends React.Component<{}, State> {
       <Display>
         <Header/>
         <AlbumListComponent onChange={this.handleSelect}/>
-        <Body id={id} size={400}/>
+        <Body id={id} size={256}/>
         <Footer/>
       </Display>
     );
