@@ -35,6 +35,10 @@ export async function addAlbum(album: InputRaw): Promise<Album> {
   );
 }
 
+export async function updateAlbum(album: Album) {
+  return await exec(`UPDATE ${TableName} SET ${buildQueries({ name: album.name })} WHERE ${buildQueries({ id: album.id })}`);
+}
+
 export async function getAlbum(id: number) {
   return await get(`SELECT * FROM ${TableName} WHERE ${buildQueries({ id, })}`) as Album;
 }

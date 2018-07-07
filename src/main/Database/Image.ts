@@ -39,7 +39,7 @@ export async function addImage(image: InputRaw) {
   await exec(
     `INSERT OR IGNORE INTO ${TableName}${buildValues(image)}`
   );
-  return await get(`SELECT * FROM ${TableName} WHERE ${buildQueries({ path: image.path, })}`);
+  return await get(`SELECT * FROM ${TableName} WHERE ${buildQueries({ path: image.path, })}`) as Image;
 }
 
 export async function updateImage(queries: {

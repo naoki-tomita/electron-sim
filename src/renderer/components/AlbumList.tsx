@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 import { onceUpdateAlbums, getAlbums } from "../Services/Album";
 import { Album } from "../../types/Album";
+import { AlbumItem } from "./AlbumItem";
 
 interface Props {
   onChange: (id: number) => void;
@@ -48,25 +49,26 @@ export class AlbumListComponent extends React.Component<Props, State> {
 
   renderAlbumItem(album: Album) {
     const { selectedItem = null } = this.state || {};
-    const isSelected = selectedItem &&
+    const isSelected = !!selectedItem &&
                        selectedItem.path === album.path;
-
-    const FullWidthListItem = styled.div`
-      width: 100%;
-      background-color: ${isSelected ? "gray" : "inhelit"};
-    `
     return (
-      <FullWidthListItem key={album.path} onClick={() => this.onSelect(album)}>
-        {album.name || album.path}
-      </FullWidthListItem>
+      <AlbumItem
+        key={album.path}
+        onClick={() => this.onSelect(album)}
+        isSelected={isSelected}
+        album={album}
+      />
     );
   }
 
   onSelect = (selectedItem: Album) => {
-    this.setState({
-      selectedItem,
-    });
-    const { onChange } = this.props;
-    onChange(selectedItem.id);
+    const { selectedItem: oldItem } = this.state;
+    if (!oldItem || oldItem.id !== selectedItem.id) {
+      this.setState({
+        selectedItem,
+      });
+      const { onChange } = this.props;
+      onChange(selectedItem.id);
+    }
   }
 }

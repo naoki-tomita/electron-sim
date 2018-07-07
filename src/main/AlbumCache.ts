@@ -6,22 +6,37 @@ import { isExtImage } from "../utils/File";
 import { join, extname } from "path";
 import { dispatchUpdateAlbum, dispatchUpdateAlbums } from "./IPC/Album";
 import { dispatchUpdateImage } from "./IPC/Image";
+import { Album } from "../types/Album";
 
-export async function createAlbumCache(path: string) {
+async function createAlbumInfo(path: string) {
   const album = await addAlbum({ path });
   dispatchUpdateAlbum(album.id);
   dispatchUpdateAlbums();
+  return album;
+}
 
-  const files = await readdir(path);
+const que: Album[] = [];
+function addQue(album: Album) {
+  que.push(album);
+}
+
+async function run() {
+  const album = que.shift();
+  if (!album) {
+    return;
+  }
+
+  const files = await readdir(album.path);
   const datas = files
     .filter(f => isExtImage(extname(f)))
     .map(f => ({
       album_id: album.id,
-      path: join(path, f),
+      path: join(album.path, f),
     }));
   for (const data of datas) {
-    await addImage(data);
+    const image = await addImage(data);
     dispatchUpdateAlbum(album.id);
+    dispatchUpdateImage(image.id);
   }
 
   const images = await getImages(album.id);
@@ -31,4 +46,12 @@ export async function createAlbumCache(path: string) {
     dispatchUpdateAlbum(album.id);
     dispatchUpdateImage(image.id);
   }
+
+  run();
+}
+
+export async function createAlbumCache(path: string) {
+  const album = await createAlbumInfo(path);
+  addQue(album);
+  run();
 }

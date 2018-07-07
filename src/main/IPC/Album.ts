@@ -1,6 +1,7 @@
 import { ipcMain, Event } from "electron";
-import { getAlbums, getAlbum } from "../Database/Album";
+import { getAlbums, getAlbum, updateAlbum } from "../Database/Album";
 import { getImages } from "../Database/Image";
+import { Album } from "../../types/Album";
 
 ipcMain.on("album:list", async (event: Event) => {
   const albums = await getAlbums();
@@ -10,6 +11,11 @@ ipcMain.on("album:list", async (event: Event) => {
 ipcMain.on("album:image:list", async (event: Event, arg: { id: number }) => {
   const images = await getImages(arg.id);
   event.sender.send("album:image:list", images);
+});
+
+ipcMain.on("album:item:post", async (event: Event, arg: Album) => {
+  updateAlbum(arg);
+  event.sender.send("album:item:post");
 });
 
 export function dispatchUpdateAlbums() {
