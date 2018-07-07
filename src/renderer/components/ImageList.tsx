@@ -50,22 +50,36 @@ export class ImageListComponent extends React.Component<Props, State> {
     this.state = { images: [] };
   }
 
+  shouldComponentUpdate(nextProps: Props, nextState: State) {
+    console.log(nextProps, this.props);
+    // when id changed.
+    if (nextProps.id !== this.props.id) {
+      return true;
+    }
+
+    // when image updated.
+    if (this.state.images.length !== nextState.images.length) {
+      return true;
+    }
+    if (
+      this.state.images.length !== 0 &&
+      this.state.images[0].id !== nextState.images[0].id
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   componentDidMount() {
     const { id } = this.props;
     if (id != null && !this.ids.includes(id)) {
+      console.log("new id", id);
       this.ids.push(id);
       onUpdateAlbum(id, () => this.handleUpdateAlbum(id));
+    } if (id != null) {
+      console.log("already known id", id);
+      this.loadAlbum(id)
     }
-    this.handleUpdateAlbum(id);
-  }
-
-  componentDidUpdate() {
-    const { id } = this.props;
-    if (id != null && !this.ids.includes(id)) {
-      this.ids.push(id);
-      onUpdateAlbum(id, () => this.handleUpdateAlbum(id));
-    }
-    this.handleUpdateAlbum(id);
   }
 
   handleUpdateAlbum = async (id: number | undefined) => {
@@ -74,9 +88,13 @@ export class ImageListComponent extends React.Component<Props, State> {
       return;
     }
     if (curId === id) {
-      const images = await getAlbumImages(id);
-      this.setState({ images });
+      this.loadAlbum(id);
     }
+  }
+
+  loadAlbum = async (id: number) => {
+    const images = await getAlbumImages(id);
+    this.setState({ images });
   }
 
   render() {

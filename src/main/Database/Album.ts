@@ -36,13 +36,22 @@ export async function addAlbum(album: InputRaw): Promise<Album> {
 }
 
 export async function updateAlbum(album: Album) {
-  return await exec(`UPDATE ${TableName} SET ${buildQueries({ name: album.name })} WHERE ${buildQueries({ id: album.id })}`);
+  const result = await exec(
+    `UPDATE ${TableName} SET ${buildQueries({ name: album.name })} WHERE ${buildQueries({ id: album.id })}`
+  );
+  return result;
 }
 
 export async function getAlbum(id: number) {
-  return await get(`SELECT * FROM ${TableName} WHERE ${buildQueries({ id, })}`) as Album;
+  const result = await get(
+    `SELECT * FROM ${TableName} WHERE ${buildQueries({ id, })}`
+  ) as Album;
+  return result;
 }
 
 export async function getAlbums() {
-  return await all(`SELECT * FROM ${TableName}`) as Album[];
+  const result = await all(
+    `SELECT * FROM ${TableName}`
+  ) as Album[];
+  return result;
 }

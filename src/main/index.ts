@@ -4,9 +4,9 @@ import { createAlbumCache } from "./AlbumCache";
 
 async function main() {
   initialize();
-  createAlbumCache("/Volumes/Untitled/pics/2013-12-22");
-  createAlbumCache("/Volumes/Untitled/pics/2014-12-07");
-  createAlbumCache("/Volumes/Untitled/pics/2014-12-29");
+  await createAlbumCache("/Volumes/Untitled/pics/2013-12-22");
+  await createAlbumCache("/Volumes/Untitled/pics/2014-12-07");
+  await createAlbumCache("/Volumes/Untitled/pics/2014-12-29");
 }
 
 app.on("ready", () => {

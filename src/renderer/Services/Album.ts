@@ -4,15 +4,20 @@ import { send } from "./IPC";
 import { Image } from "../../types/Images";
 
 export async function getAlbums() {
-  return await send<Album[]>("album:list");
+  const result = await send<Album[]>("album:list");
+  return result;
 }
 
 export async function getAlbumImages(id: number) {
-  return await send<Image[]>("album:image:list", { id, });
+  console.time("getAlbumImages");
+  const result = await send<Image[]>("album:image:list", { id, });
+  console.timeEnd("getAlbumImages");
+  return result;
 }
 
 export async function postAlbum(album: Album) {
-  return await send("album:item:post", album);
+  const result = await send("album:item:post", album);
+  return result;
 }
 
 export function onceUpdateAlbums(fn: () => void) {
@@ -24,7 +29,5 @@ export function onceUpdateAlbum(id: number, fn: () => void) {
 }
 
 export function onUpdateAlbum(id: number, fn: () => void) {
-  ipcRenderer.on(`album:update:${id}`, fn);
-  console.log(ipcRenderer.eventNames());
-  console.log(ipcRenderer.listenerCount(`album:update:${id}`));
+  ipcRenderer.on(`album:update:${id}`, fn);;
 }

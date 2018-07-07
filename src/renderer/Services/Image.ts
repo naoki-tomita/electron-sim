@@ -2,7 +2,8 @@ import { send } from "./IPC";
 import { ipcRenderer } from "electron";
 
 export async function getRawImage(id: number) {
-  return await send<string>("image:raw", { id, });
+  const result = await send<string>("image:raw", { id, });
+  return result;
 }
 
 export function onceUpdateImage(id: number, fn: () => void) {

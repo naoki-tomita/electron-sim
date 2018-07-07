@@ -52,6 +52,7 @@ class App extends React.Component<{}, State> {
   }
 
   handleSelect = (id: number) => {
+    console.log("id changed", id);
     this.setState({ id, });
   }
 }

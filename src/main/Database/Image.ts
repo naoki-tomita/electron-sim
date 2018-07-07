@@ -57,8 +57,15 @@ export async function getImage(id: number) {
 }
 
 export async function getImages(albumId?: number) {
+  let result: Image[];
   if (albumId != null) {
-    return await all(`SELECT * FROM ${TableName} WHERE ${buildQueries({ album_id: albumId, })}`) as Image[];
+    result = await all(
+      `SELECT * FROM ${TableName} WHERE ${buildQueries({ album_id: albumId, })}`
+    ) as Image[];
+  } else {
+    result = await all(
+      `SELECT * FROM ${TableName}`
+    ) as Image[];
   }
-  return await all(`SELECT * FROM ${TableName}`) as Image[];
+  return result;
 }
