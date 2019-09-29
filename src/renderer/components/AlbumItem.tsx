@@ -17,12 +17,12 @@ interface State {
   name: string;
 }
 
-const FullWidthListItem = styled<{ isSelected: boolean; }, "div">("div")`
+const FullWidthListItem = styled.div<{ isSelected: boolean }>`
   width: 100%;
-  background-color: ${(props: any) => props.isSelected ? "gray" : "inherit"};
+  background-color: ${props => props.isSelected ? "gray" : "inherit"};
 `
 
-const RenameInput = styled<{ isSelected: boolean }, "input">("input")`
+const RenameInput = styled.input<{ isSelected: boolean }>`
   width: 100%;
   background-color: ${(props: any) => props.isSelected ? "gray" : "inherit"};
 `;

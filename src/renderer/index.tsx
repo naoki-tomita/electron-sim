@@ -1,11 +1,9 @@
-import { ipcRenderer } from "electron";
 import * as React from "react";
 import { render } from "react-dom";
-import styled, { injectGlobal } from "styled-components";
+import styled from "styled-components";
 
 import { AlbumListComponent } from "./components/AlbumList";
 import { Body } from "./components/Body";
-import { onUpdateAlbum } from "./Services/Album";
 
 const Header = styled.div`
   background-color: green;
