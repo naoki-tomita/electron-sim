@@ -1,9 +1,11 @@
-import { imageThumbnail } from "../utils/image-thumbnail";
+import { readFile } from "fs";
+import sharp from "sharp";
+
+async function readFileAsync(path: string): Promise<Buffer> {
+  return new Promise<Buffer>(ok => readFile(path, (_, data) => ok(data)))
+}
 
 export async function createThumbnail(path: string, width: number) {
-  return await imageThumbnail(path, {
-    percentage: 100,
-    width,
-    responseType: "buffer",
-  });
+  const fileContent = await readFileAsync(path);
+  return sharp(fileContent).resize(width).toBuffer();
 }

@@ -1,18 +1,22 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import { initialize } from "./Database";
-import { createAlbumCache } from "./AlbumCache";
+import { initialize as initIPC } from "./IPC/index";
+import { initialize as initDB, index } from "./Database";
 
 async function main() {
-  initialize();
-  await createAlbumCache("/Volumes/Untitled/pics/2013-12-22");
-  await createAlbumCache("/Volumes/Untitled/pics/2014-12-07");
-  await createAlbumCache("/Volumes/Untitled/pics/2014-12-29");
+  initIPC();
+  await initDB();
+  index("/Users/naoki.tomita/Desktop/album/dogs");
+  index("/Users/naoki.tomita/Desktop/album/cats");
+  index("/Users/naoki.tomita/Desktop/album/images");
 }
 
 app.on("ready", () => {
   const window = new BrowserWindow({
     width: 800,
     height: 600,
+    webPreferences: {
+      nodeIntegration: true,
+    }
   });
   window.loadFile("./index.html");
 });
