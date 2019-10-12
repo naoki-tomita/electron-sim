@@ -1,65 +1,26 @@
-import * as React from "react";
+import React, { useEffect } from "react";
 import { render } from "react-dom";
-import styled from "styled-components";
+import { StoreProvider, useContext } from "./Store";
 
-import { AlbumListComponent } from "./components/AlbumList";
-import { Body } from "./components/Body";
-
-const Header = styled.div`
-  background-color: green;
-  grid-area: header;
-`;
-
-const Footer = styled.div`
-  background-color: blue;
-  grid-area: footer;
-`;
-
-const Display = styled.div`
-  display: grid;
-  width: 100%;
-  height: 100%;
-  grid-template-areas:
-    'header header'
-    'album-list body'
-    'footer footer';
-  grid-template-columns: 240px auto;
-  grid-template-rows: 80px auto 80px;
-`;
-
-interface State {
-  id: number;
-}
-
-class App extends React.Component<{}, State> {
-  constructor(p: {}, c: any) {
-    super(p, c);
-    this.state = {} as any;
-  }
-
-  render() {
-    const { id } = this.state;
-    return (
-      <Display>
-        <Header/>
-        <AlbumListComponent onChange={this.handleSelect}/>
-        <Body id={id} size={256}/>
-        <Footer/>
-      </Display>
-    );
-  }
-
-  handleSelect = (id: number) => {
-    console.log("id changed", id);
-    this.setState({ id, });
-  }
-}
-
-async function main() {
-  render(
-    <App/>,
-    document.getElementById("app"),
+const InnerApp = () => {
+  const { albums, images, currentAlbum, update, selectAlbum } = useContext();
+  useEffect(() => { update() }, [currentAlbum]);
+  return (
+    <>
+      <h1>app</h1>
+      <ul>
+        {albums.map(it => <li key={it.id} onClick={() => selectAlbum(it)}>{currentAlbum && it.id === currentAlbum.id ? <b>{it.name}</b> : it.name}</li>)}
+      </ul>
+      <hr />
+      <ul>
+        {images.map(it => <li key={it.id}><img src={`data:image/png;base64,${it.thumbnail}`} /></li>)}
+      </ul>
+    </>
   );
 }
 
-main();
+const App = () => {
+  return (<StoreProvider><InnerApp /></StoreProvider>);
+};
+
+render(<App />, document.getElementById("app"));

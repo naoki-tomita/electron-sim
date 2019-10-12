@@ -1,73 +1,39 @@
-import { exec, createDatabase } from "./AsyncSQLite";
-import { createTable as createAlbumTable } from "./Album";
-import { createTable as createImageTable } from "./Image";
+import { join, extname } from "path";
 
-export interface TableSchema {
-  key: string
-  type: "INTEGER" | "TEXT" | "BOOLEAN";
-  nullable?: boolean;
-  unique?: boolean;
-  primaryKey?: boolean;
-  default?: string | number;
-}
+import { createDatabase } from "./AsyncSQLite";
+import { createTableImage, indexImage } from "./Image";
+import { createTableAlbum, indexAlbum } from "./Album";
+import { readdir } from "../../utils/fs";
+import { Queue } from "../../utils/Queue";
+import { dispatchUpdateAlbum } from "../Dispatcher/Album";
+import { dispatchUpdateImages } from "../Dispatcher/Image";
 
-function buildSchema(s: TableSchema) {
-  return `${s.key} ${s.type} ${
-    s.nullable ? "NULL" : "NOT NULL"
-  } ${
-    s.primaryKey ? "PRIMARY KEY AUTOINCREMENT" : ""
-  } ${
-    s.default != null ? `DEFAULT ${s.default}` : ""
-  } ${
-    s.unique ? "UNIQUE" : ""
-  }`;
-}
-
-export async function createTable(
-  table: string,
-  schema: TableSchema[],
-) {
-  const builtSchema = schema.map(s => buildSchema(s));
-  await exec(`CREATE TABLE IF NOT EXISTS ${table} (${builtSchema.join(",")});`);
-}
-
-function toDatabaseString(data: string | number | null | undefined) {
-  if (data == null) {
-    return "NULL";
-  }
-  switch (typeof data) {
-    case "string":
-      return `"${data}"`;
-    case "number":
-      return `${data}`;
-    default:
-      return "NULL";
-  }
-}
-
-export function buildValues(raw: {
-  [key: string]: string | number | null | undefined;
-}) {
-  const keys = Object.keys(raw);
-  const values = keys.map(k => toDatabaseString(raw[k]));
-  return `(${keys.join(",")}) VALUES(${values.join(",")})`
-}
-
-export function buildQueries(raw: {
-  [key: string]: string | number | null | undefined;
-}) {
-  return Object.keys(raw)
-    .filter(k => raw[k] != null)
-    .map(k => `${k}=${toDatabaseString(raw[k])}`)
-    .join(" ");
-}
-
-/**
- * データベースの初期化
- * 必要なテーブル(なければ)を作る
- */
 export async function initialize() {
   await createDatabase("./database.db");
-  await createAlbumTable();
-  await createImageTable();
+  await createTableAlbum();
+  await createTableImage();
+}
+
+const queue = new Queue();
+
+export async function index(path: string) {
+  const files = await readdir(path);
+  const id = await indexAlbum(path);
+  dispatchUpdateAlbum(id);
+  files.filter(it => supported(extname(it))).forEach(file =>
+    queue.add(async () => {
+      await indexImage(id, join(path, file));
+      dispatchUpdateImages(id);
+    }));
+}
+
+function supported(extname: string) {
+  switch(extname) {
+    case ".jpg":
+    case ".jpeg":
+    case ".png":
+      return true;
+    default:
+      return false;
+  }
 }
