@@ -1,14 +1,18 @@
 import React, { createContext, FC, useContext as useContextOriginal } from "react";
 import { useAlbums, AlbumStore } from "./Album";
+import { useFileSystem, FileSystemStore } from "./FileSystem";
+import { AppStore, useApp } from "./App";
 
-type Store = AlbumStore;
+type Store = AppStore & AlbumStore & FileSystemStore;
 
 export const Context = createContext({} as any);
 
 export const StoreProvider: FC = ({ children }) => {
   const album = useAlbums();
+  const filesystem = useFileSystem();
+  const appStore = useApp();
   return (
-    <Context.Provider value={{ ...album }}>
+    <Context.Provider value={{ ...album, ...filesystem, ...appStore }}>
       {children}
     </Context.Provider>
   );

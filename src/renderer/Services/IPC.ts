@@ -22,3 +22,19 @@ export async function images(albumId: number): Promise<Images> {
 export function onUpdateAlbums(fn: () => void) {
   ipcRenderer.on("albums", fn);
 }
+
+export function removeUpdateAlbums() {
+  ipcRenderer.removeAllListeners("albums");
+}
+
+export function openAlbumSelector() {
+  ipcRenderer.send("albumselector:open");
+}
+
+export function dirs(path: string): Promise<{ currentDir: string, dirs: string[] }> {
+  return send("filesystem:dirs", path);
+}
+
+export function indexAlbum(path: string) {
+  ipcRenderer.send("albums:post", path);
+}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { albums as fetchAlbums, images as fetchImages, onUpdateAlbums } from "../Services/IPC";
+import { albums as fetchAlbums, images as fetchImages, onUpdateAlbums, indexAlbum, removeUpdateAlbums } from "../Services/IPC";
 import { Albums, Album, Images } from "../../types/Types";
 
 interface State {
@@ -17,20 +17,21 @@ interface Getters {
 interface Actions {
   update(): void;
   selectAlbum(album: Album): void;
-  init(): void;
+  initUpdateHandle(): void;
+  removeUpdateHandle(): void;
+  indexAlbum(path: string): void;
 }
 
 export type AlbumStore = Getters & Actions
 
 export function useAlbums(): AlbumStore {
-  const x = useState<State>({
+  const [state, setState] = useState<State>({
     albums: [],
     currentAlbum: null,
     images: [],
   });
-  const [state, setState] = x;
 
-  function init() {
+  function initUpdateHandle() {
     onUpdateAlbums(() => update());
   }
 
@@ -52,6 +53,8 @@ export function useAlbums(): AlbumStore {
     images,
     update,
     selectAlbum,
-    init,
+    initUpdateHandle,
+    removeUpdateHandle: removeUpdateAlbums,
+    indexAlbum,
   }
 }
