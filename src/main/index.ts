@@ -5,9 +5,9 @@ import { initialize as initDB, index } from "./Database";
 async function main() {
   initIPC();
   await initDB();
-  index("/Users/naoki.tomita/Desktop/album/dogs");
-  index("/Users/naoki.tomita/Desktop/album/cats");
-  index("/Users/naoki.tomita/Desktop/album/images");
+  // index("/Users/naoki.tomita/Desktop/album/柚希");
+  index("/Users/naoki.tomita/Desktop/album/東京藝術大学 卒業展");
+  // index("/Users/naoki.tomita/Desktop/album/韓国");
 }
 
 app.on("ready", () => {

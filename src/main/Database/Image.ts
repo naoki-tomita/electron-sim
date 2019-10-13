@@ -2,13 +2,16 @@ import { basename } from "path";
 import { createTable, insertInto, select } from "sql-query-factory";
 
 import { exec, get, all } from "./AsyncSQLite";
-import { createThumbnail } from "../Thumbnail";
+import { createThumbnail, createExif } from "../ImageMetadata";
+import { stat } from "../../utils/fs";
 
 interface ImageEntity {
   id: number;
   album_id: number;
   name: string;
   path: string;
+  date: string;
+  orientation: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
   thumbnail: string;
 }
 
@@ -18,6 +21,8 @@ export async function createTableImage() {
     .column("album_id").type("INTEGER").notNull()
     .column("name").type("TEXT").notNull()
     .column("path").type("TEXT").notNull()
+    .column("date").type("TEXT").notNull()
+    .column("orientation").type("INTEGER").notNull()
     .column("thumbnail").type("TEXT").build();
   return exec(sql);
 }
@@ -29,9 +34,10 @@ export async function indexImage(albumId: number, path: string) {
   }
   const name = basename(path);
   const thumbnail = await createThumbnail(path, 420);
+  const exif = await createExif(path);
   const sql = insertInto<ImageEntity>("image")
-    .keys("album_id", "name", "path", "thumbnail")
-    .values(albumId, name, path, thumbnail.toString("base64"))
+    .keys("album_id", "name", "path", "date", "orientation", "thumbnail")
+    .values(albumId, name, path, exif ? exif.exif.DateTimeOriginal: "", exif ? exif.image.Orientation : 1, thumbnail.toString("base64"))
     .build();
   return exec(sql);
 }

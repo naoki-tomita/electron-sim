@@ -23,6 +23,7 @@ export async function index(path: string) {
   files.filter(it => supported(extname(it))).forEach(file =>
     queue.add(async () => {
       await indexImage(id, join(path, file));
+      console.log(path, file);
       dispatchUpdateImages(id);
     }));
 }
