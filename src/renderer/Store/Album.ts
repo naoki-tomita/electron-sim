@@ -20,6 +20,7 @@ interface Actions {
   initUpdateHandle(): void;
   removeUpdateHandle(): void;
   indexAlbum(path: string): void;
+  initialize(): void;
 }
 
 export type AlbumStore = Getters & Actions
@@ -46,6 +47,11 @@ export function useAlbums(): AlbumStore {
     setState({ ...state, currentAlbum });
   }
 
+  function initialize() {
+    initUpdateHandle();
+    update();
+  }
+
   const { albums, currentAlbum, images } = state;
   return {
     albums,
@@ -56,5 +62,6 @@ export function useAlbums(): AlbumStore {
     initUpdateHandle,
     removeUpdateHandle: removeUpdateAlbums,
     indexAlbum,
+    initialize,
   }
 }

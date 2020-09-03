@@ -1,4 +1,4 @@
-import React, { createContext, FC, useContext as useContextOriginal } from "react";
+import React, { createContext, FC, useContext as useContextOriginal, useEffect } from "react";
 import { useAlbums, AlbumStore } from "./Album";
 import { useFileSystem, FileSystemStore } from "./FileSystem";
 import { AppStore, useApp } from "./App";
@@ -11,6 +11,10 @@ export const StoreProvider: FC = ({ children }) => {
   const album = useAlbums();
   const filesystem = useFileSystem();
   const appStore = useApp();
+
+  useEffect(() => {
+  }, [])
+
   return (
     <Context.Provider value={{ ...album, ...filesystem, ...appStore }}>
       {children}

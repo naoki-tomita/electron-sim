@@ -1,22 +1,18 @@
 import React, { useEffect } from "react";
 import { render } from "react-dom";
-import { StoreProvider, useContext } from "./Store";
+import { StoreProvider } from "./Store";
+import { AppSwitcher } from "./Components/AppSwitcher";
+import { Albums } from "./Components/Albums";
+import { Images } from "./Components/Images";
 
 const InnerApp = () => {
-  const { albums, images, currentAlbum, initUpdateHandle, removeUpdateHandle, update, selectAlbum, openAlbumSelector } = useContext();
-  useEffect(() => (initUpdateHandle(), removeUpdateHandle), [])
-  useEffect(() => { update() }, [currentAlbum]);
   return (
     <>
       <h1>app</h1>
-      <ul>
-        {albums.map(it => <li key={it.id} onClick={() => selectAlbum(it)}>{currentAlbum && it.id === currentAlbum.id ? <b>{it.name}</b> : it.name}</li>)}
-      </ul>
-      <button onClick={openAlbumSelector}>+</button>
+      <AppSwitcher />
+      <Albums />
       <hr />
-      <ul>
-        {images.map(it => <li key={it.id}><img src={`data:image/png;base64,${it.thumbnail}`} /></li>)}
-      </ul>
+      <Images />
     </>
   );
 }
